@@ -27,7 +27,7 @@ const options = {
 
 const observer = new IntersectionObserver(onGalleryUpdate, options);
 
-function onFormSubmit(e) {
+async function onFormSubmit(e) {
     e.preventDefault();
     // refs.loadBtn.classList.add('is-hidden');
     newsFetchApi.resetPage()
@@ -39,17 +39,12 @@ function onFormSubmit(e) {
         onEmptySearch();
         return
     }
-
-    newsFetchApi.fetchImages()
-        .then(data => {
-            clearGallery();
-            const numberOfPages = Math.ceil(data.totalHits / perPage);
+    try {
+    const data = await newsFetchApi.fetchImages()
+            clearGallery(data);
         newsFetchApi.resetPage();
         if (data.totalHits === 0) {
             uncorrectSearch();
-        }
-        else if (newsFetchApi.currentPage === numberOfPages) {
-            endOfCollection()
         }
         else { 
         // refs.loadBtn.classList.remove('is-hidden')              
@@ -57,10 +52,11 @@ function onFormSubmit(e) {
             createGallery(data.hits);
             let lightbox = new SimpleLightbox('.gallery a').refresh();
         }
-            observer.observe(refs.guard);
-            
-    })
-    .catch(error => console.log(error))
+        observer.observe(refs.guard);
+    }
+    catch (error) {
+        console.log(error.message)
+    }
     
 }
 
@@ -119,15 +115,18 @@ function endOfCollection() {
 }
 
 function onGalleryUpdate(entries) {
-    entries.forEach(entry => {
+    entries.forEach(async (entry) => {
         if (entry.isIntersecting) {
-            newsFetchApi.incrementPage();
-            newsFetchApi.fetchImages().then(data => {
+                newsFetchApi.incrementPage();
+            const data = await newsFetchApi.fetchImages()
                 createGallery(data.hits);
-                let lightbox = new SimpleLightbox('.gallery a').refresh();
-            })
+            let lightbox = new SimpleLightbox('.gallery a').refresh();
+            console.log(newsFetchApi.page)
+            const numberOfPages = Math.ceil(data.totalHits / perPage);
+            if (newsFetchApi.currentPage === numberOfPages) {
+            endOfCollection()
         }
-        
-    })
+            }
+        })
+    }
 
-}

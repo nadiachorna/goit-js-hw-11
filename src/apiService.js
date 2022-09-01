@@ -21,10 +21,9 @@ export default class FetchApi {
             page: this.page,
             per_page: 40
     }
-        const response = await axios.get(`?key=${params.key}&q=${params.q}&image_type=photo&orientation=horizontal&safesearch=true&page=${params.page}&per_page=${params.per_page}`)
-        .then(response => response.data)
-
-        return response;
+        // const response = await axios.get(`?key=${params.key}&q=${params.q}&image_type=${params.image_type}&orientation=${params.orientation}&safesearch=${params.safesearch}&page=${params.page}&per_page=${params.per_page}`)
+const response = await axios.get('/',{params})
+        return response.data;
     }
 
     incrementPage() {
